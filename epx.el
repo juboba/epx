@@ -38,7 +38,7 @@
 
 ;; TODO think of better env parsing/entering
 ;; TODO consider other storages again (separate .el, .json, .toml...)
-;; TODO Package Headers
+;; TODO get rid of run-with-timer
 
 
 (defun epx--current-project-root ()
