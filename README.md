@@ -40,15 +40,15 @@ using `use-package` (assuming `project.el` is already set up) is:
 
 # Usage
 
--`epx-add-command`
+- `epx-add-command`
 :   Prompt for a command, name, env vars, and whether to use a
     compilation buffer; writes it to `.dir-locals.el`.
 
--`epx-run-command-in-shell`
+- `epx-run-command-in-shell`
 :   Pick a saved command and execute it in a shell (or compilation)
     buffer scoped to the project.
 
--`epx-remove-command`
+- `epx-remove-command`
 :   Remove a saved command from `.dir-locals.el`.
 
 # Example entry in .dir-locals.el
