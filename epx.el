@@ -5,7 +5,7 @@
 ;; Author: Oleksandr Korzh <alex@korzh.me>
 ;; Version 0.1
 ;; Package-Requires: ((emacs "29.1"))
-;; URL: TODO
+;; URL: https://git.sr.ht/~alex-iam/epx
 ;; Keywords: project, shell, tools
 
 ;; This program is free software: you can redistribute it and/or modify
