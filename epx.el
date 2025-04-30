@@ -38,7 +38,6 @@
 
 ;; TODO think of better env parsing/entering
 ;; TODO consider other storages again (separate .el, .json, .toml...)
-;; TODO get rid of run-with-timer
 
 
 (defun epx--current-project-root ()
@@ -103,16 +102,10 @@ When called interactively, prompt for COMMAND with completion from history."
     (if use-compilation
 	(let ((default-directory root))
 	  (compilation-start cmd nil )) ;; TODO:  compilation-buffer-name-function - project-local buffer name
-      (let ((win (epx--get-or-create-shell-window root)))
+      (let* ((win (epx--get-or-create-shell-window root))
+	     (proc (get-buffer-process (window-buffer win))))
 	(select-window win)
-	;; Insert command into shell buffer
-	(run-with-timer
-	 0.1 nil
-	 (lambda ()
-	   (goto-char (point-max))
-	   (insert cmd)
-	   (comint-send-input)))))))
-
+        (comint-send-string proc (concat cmd "\n"))))))
 
 ;;;###autoload
 (defun epx-remove-command (&optional command)
