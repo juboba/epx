@@ -1,9 +1,9 @@
-;;; epx.el --- Emacs Project eXecutor: Manage and run project-specific shell commands -*- lexical-binding: t -*-
+;;; epx.el --- Manage and run project-specific shell commands -*- lexical-binding: t -*-
 
 ;; Copyright (c) 2025 Oleksandr Korzh
 
 ;; Author: Oleksandr Korzh <alex@korzh.me>
-;; Version 0.1
+;; Version: 0.1
 ;; Package-Requires: ((emacs "29.1"))
 ;; URL: https://git.sr.ht/~alex-iam/epx
 ;; Keywords: project, shell, tools
