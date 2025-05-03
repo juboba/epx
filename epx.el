@@ -25,6 +25,7 @@
 ;;; Commentary:
 
 ;; epx is a command runner and manager for project.el in Emacs.
+;; ’epx’ stands for ’Emacs Project eXecutor’.
 ;; It stores commands in .dir-locals.el or any other dir-locals-file that
 ;; you set. It allows you to add or remove commands, no editing
 ;; capabilities for now. You can choose whether to use compilation
@@ -35,9 +36,6 @@
 (require 'cl-lib)
 (require 'files)
 (require 'files-x)
-
-;; TODO think of better env parsing/entering
-;; TODO consider other storages again (separate .el, .json, .toml...)
 
 
 (defun epx--current-project-root ()
