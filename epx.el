@@ -3,7 +3,7 @@
 ;; Copyright (c) 2025 Oleksandr Korzh
 
 ;; Author: Oleksandr Korzh <alex@korzh.me>
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "29.1"))
 ;; URL: https://git.sr.ht/~alex-iam/epx
 ;; Keywords: project, shell, tools
@@ -26,19 +26,40 @@
 
 ;; epx is a command runner and manager for project.el in Emacs.
 ;; ’epx’ stands for ’Emacs Project eXecutor’.
+
+;; Warning! Only works in Unix-like systems for now due to
+;; how environment variables are processed. This is temporary.
+
 ;; It stores commands in .dir-locals.el or any other dir-locals-file that
 ;; you set. It allows you to add or remove commands, no editing
 ;; capabilities for now. You can choose whether to use compilation
-;; buffer when you create your command. After the command is created,
-;; you can execute it using ’epx-run-command-in-shell’ (You’ll probably
-;; want to bind it). Completion for command names is provided. Executing
-;; a command happens in a separate window (either ’shell’ or compilation).
+;; buffer when you create your command.
+
+;; After the command is created, you can execute it using
+;; ’epx-run-command-in-shell’ (You’ll probably want to bind it). Completion
+;; for command names is provided. Executing a command happens in a separate
+;; window (either ’shell’ or compilation).
 
 ;;; Code:
 (require 'project)
 (require 'cl-lib)
 (require 'files)
 (require 'files-x)
+
+
+(defun epx--find-command-by-prop (prop-name prop-value)
+  "Find a command in commands storage by a propery."
+  (cl-find-if (lambda (cmd)
+		(equal (plist-get cmd prop-name) prop-value))
+	      (epx--read-cmds-locals)))
+
+
+(defun epx--annotate (candidate)
+  "Show command for CANDIDATE along with it’s name on completion"
+  (when candidate
+    (format "%s %s"
+	    (propertize " " 'display '(space :align-to 30))
+	    (propertize (plist-get (epx--find-command-by-prop :name candidate) :command) 'face 'completions-annotations))))
 
 
 (defun epx--current-project-root ()
@@ -67,6 +88,7 @@ If the file already exists, do nothing."
          (cmds (if (file-exists-p locals-file)
                    (epx--read-cmds-locals)))
          (history (mapcar (lambda (plist) (plist-get plist :name)) cmds))
+	 (completion-extra-properties (list :annotation-function #'epx--annotate))
          (name (completing-read "Project command: " history nil t)))
     (cl-find-if (lambda (plist) (string= (plist-get plist :name) name)) cmds)))
 
@@ -102,7 +124,7 @@ When called interactively, prompt for COMMAND with completion from history."
 	 (use-compilation (plist-get command :compile)))
     (if use-compilation
 	(let ((default-directory root))
-	  (compilation-start cmd nil )) ;; TODO:  compilation-buffer-name-function - project-local buffer name
+	  (compilation-start cmd nil )) ;; TODO: research using project-compile instead
       (let* ((win (epx--get-or-create-shell-window root))
 	     (proc (get-buffer-process (window-buffer win))))
 	(select-window win)
@@ -124,25 +146,17 @@ When called interactively, prompt for COMMAND with completion from history."
 	  (kill-buffer)))))
 
 
-(defun epx--parse-env (env)
-  "Parse ENV from a string separated by semicolons into a list of plists."
-  (mapcar (lambda(s)
-	    (let ((pair (split-string s "\=")))
-	      (list :name (car pair) :value (cadr pair))))
-	  (split-string env "\\;")))
-
-
 (defun epx--prepare-env (env-list)
   "Convert ENV-LIST from the list of plists into a semicolon-separated string."
   (string-join
    (mapcar (lambda (el)
 	     (concat (plist-get el :name) "=" (plist-get el :value)))
 	   env-list)
-   ";"))
+   " "))
 
 
 ;;;###autoload
-(defun epx-add-command (&optional cmd name env compile)
+(defun epx-add-command (&optional cmd name env-vars compile)
   "Add a new command to dir-locals-file interactively.
 CMD and NAME are expected to be non-empty.
 ENV and COMPILE default to nil."
@@ -154,14 +168,22 @@ ENV and COMPILE default to nil."
           (name (read-string "Command name: "))
           (_ (when (string-empty-p name)
                (user-error "Command name cannot be empty")))
-          (env (read-string "Env vars (semicolon-separated): "))
-          (compile (y-or-n-p "Do you want to use compilation buffer for your command?")))
-     (list cmd name env compile)))
+	  (compile (y-or-n-p "Do you want to use compilation buffer for your command?"))
+          ;; (env (read-string "Env vars (semicolon-separated): "))
+	  (env-vars '())
+	  (env-name ""))
+     (while (progn
+	      (setq env-name (read-string "Environment variable name (empty to finish): "))
+	      (not (string-empty-p env-name)))
+       (let ((env-value (read-string (format "Value for %s: " env-name))))
+
+	 (if (not (string-empty-p env-value))
+	     (push (list :name env-name :value env-value) env-vars)
+	   (warn "Empty value, skipping this variable"))))
+
+       (list cmd name env-vars compile)))
   (epx--create-locals-file)
-  (let ((new-cmd (list :name name :command cmd :env (if (equal "" env)
-							nil
-						      (epx--parse-env env))
-		       :compile compile)))
+  (let ((new-cmd (list :name name :command cmd :env env-vars :compile compile)))
     (epx--record-command new-cmd)))
 
 
