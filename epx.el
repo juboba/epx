@@ -45,6 +45,7 @@
 (require 'cl-lib)
 (require 'files)
 (require 'files-x)
+(require 'comint)
 
 
 (defun epx--find-command-by-prop (prop-name prop-value)
