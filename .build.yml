@@ -1,0 +1,30 @@
+image: alpine/edge
+packages:
+  - emacs-nox
+  - git
+sources:
+  - https://git.sr.ht/~alex-iam/epx
+environment:
+  PACKAGE_LINT_DIR: package-lint
+  REPO_DIR: epx
+tasks:
+  - setup: |
+      git clone --depth 1 https://github.com/purcell/package-lint.git "$PACKAGE_LINT_DIR"
+  - byte-compile: |
+      cd "$REPO_DIR"
+      emacs --batch \
+        --eval "(progn \
+                  (setq byte-compile-error-on-warn t) \
+                  (byte-compile-file \"epx.el\"))"
+  - checkdoc: |
+      cd "$REPO_DIR"
+      emacs --batch \
+        --eval "(progn \
+                  (require 'checkdoc) \
+                  (checkdoc-file \"epx.el\"))"
+  - package-lint: |
+      cd "$REPO_DIR"
+      PACKAGE_LINT_ABS_PATH="/home/build/${PACKAGE_LINT_DIR}"
+      emacs --batch \
+        --load "${PACKAGE_LINT_ABS_PATH}/package-lint.el" \
+        --funcall package-lint-batch-and-exit "epx.el"
