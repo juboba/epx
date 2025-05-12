@@ -1,3 +1,4 @@
+[![builds.sr.ht status](https://builds.sr.ht/~alex-iam/epx/commits/master/.build.yml.svg)](https://builds.sr.ht/~alex-iam/epx/commits/master/.build.yml?)
 # epx -- Emacs Project eXecutor
 
 
