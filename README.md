@@ -1,3 +1,4 @@
+[![MELPA](https://melpa.org/packages/epx-badge.svg)](https://melpa.org/#/epx)
 [![builds.sr.ht status](https://builds.sr.ht/~alex-iam/epx/commits/master/.build.yml.svg)](https://builds.sr.ht/~alex-iam/epx/commits/master/.build.yml?)
 # epx -- Emacs Project eXecutor
 
@@ -27,8 +28,7 @@ remove, and run these project tasks.
 
 # Installation
 
-Ensure `epx.el` is available on your Emacs `load-path`. A common way
-using `use-package` (assuming `project.el` is already set up) is:
+`epx` can be installed from MELPA. A common way to setup the package using `use-package` is:
 
 ```
 (use-package epx
@@ -38,6 +38,8 @@ using `use-package` (assuming `project.el` is already set up) is:
   ("C-c p c" . #'epx-add-command)
   ("C-c p d" . #'epx-remove-command))
 ```
+
+You can also always install the package using `M-x package-install` instead.
 
 # Usage
 
