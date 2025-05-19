@@ -85,8 +85,7 @@ working directory.
 # Contributing
 
 Patches, bug reports, and suggestions are welcome! Please use the
-SourceHut mailing list or issue tracker:
-<https://git.sr.ht/~alex-iam/epx>,<https://todo.sr.ht/~alex-iam/epx>
+SourceHut mailing [list](https://lists.sr.ht/~alex-iam/epx) or [issue tracker](https://todo.sr.ht/~alex-iam/epx).
 
 # License
 
