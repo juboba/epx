@@ -1,4 +1,5 @@
-* TODO consider other storages again (separate .el, .json, .toml...) (parse json to plist: json-object-type) 
+* IN PROGRESS consider other storages again (separate .el, .json, .toml...) (parse json to plist: json-object-type) 
+** DONE separate ~.eld~
 * TODO add justfile commands and similar (perhaps customizable addition to completion in epx-run-command-in-shell)
 ** justfile
 ** Taskfile
@@ -6,3 +7,4 @@
 ** Rakefile
 ** pyproject.toml
 * TODO allow customization of whether throw an error on non-existent project (or prompt for it)
+* TODO add ~eshell~ as a user-customizable option
