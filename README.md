@@ -5,6 +5,10 @@
 
 Run and manage per-project shell commands with project.el
 
+## Source code repositories:
+- upstream on sourcehut: https://git.sr.ht/~alex-iam/epx
+- mirror on github: https://github.com/alex-iam/epx
+
 
 # Overview
 
@@ -76,8 +80,7 @@ You can also always install the package using `M-x package-install` instead.
   :compile t))
 ```
 
-With this entry present in your project root's `/.dir-locals.el` (and
-after you approve loading local variables), running
+With this entry present in your project root's commands file, running
 `M-x epx-run-command-in-shell RET lint RET` will execute `ruff check .`
 in a `compilation-mode` buffer, using your project's root as the
 working directory.
@@ -85,7 +88,7 @@ working directory.
 # Contributing
 
 Patches, bug reports, and suggestions are welcome! Please use the
-SourceHut mailing [list](https://lists.sr.ht/~alex-iam/epx) or [issue tracker](https://todo.sr.ht/~alex-iam/epx).
+SourceHut [mailing list](https://lists.sr.ht/~alex-iam/epx) or [issue tracker](https://todo.sr.ht/~alex-iam/epx). Or create an issue on [GitHub](https://github.com/alex-iam/epx)
 
 # License
 

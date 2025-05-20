@@ -6,5 +6,6 @@
 ** If feeling ambitious, make
 ** Rakefile
 ** pyproject.toml
-* TODO allow customization of whether throw an error on non-existent project (or prompt for it)
 * TODO add ~eshell~ as a user-customizable option
+* TODO consider supporting Projectile
+* TODO store project-to-variables data in user emacs directory (as in, ~epx-commands-file-type~)
