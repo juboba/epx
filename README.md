@@ -73,6 +73,7 @@ You can also always install the package using `M-x package-install` instead.
 ```
 
 ## .epx.eld
+You'll have to set `epx-commands-file-type` to `'eld`.
 
 ```
 ((:name "lint"
