@@ -95,6 +95,8 @@ working directory.
 Patches, bug reports, and suggestions are welcome! Please use the
 SourceHut [mailing list](https://lists.sr.ht/~alex-iam/epx) or [issue tracker](https://todo.sr.ht/~alex-iam/epx). Or create an issue on [GitHub](https://github.com/alex-iam/epx)
 
+For a list of contributors, look at CONTRIBUTORS file.
+
 # License
 
 GPL v3 or later. See the LICENSE file for details.
