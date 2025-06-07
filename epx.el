@@ -35,14 +35,14 @@
 ;; style of Makefile, but more Emacs-specific and tailored for this need.
 ;; The separate window for the command execution is inspired by modern IDEs.
 
-;; User can create a command bt calling ‘epx-add-command’. They will
+;; User can create a command by calling ‘epx-add-command’.  They will
 ;; be prompted for the command itself, its name, whether to use
-;; compilation buffer for this command, andenvironment variables -
+;; compilation buffer for this command, and environment variables -
 ;; one name and one value at a time.
 
 ;; Then created command can be executed by calling ‘epx-run-command-in-shell’.
-;; This command provides completion for command name. It runs the command,
-;; setting environment variables temporarily. Command is ran in a separate
+;; This command provides completion for command name.  It runs the command,
+;; setting environment variables temporarily.  Command is ran in a separate
 ;; window, which will contail either shell or compilation buffer, depending
 ;; on command’s :compile option.
 
@@ -60,6 +60,8 @@
 (require 'files)
 (require 'files-x)
 (require 'comint)
+
+
 
 
 ;; --- Custom variables and handling ---
@@ -93,19 +95,22 @@
 
 ;; --- Annotation ---
 
-(defun epx--find-command-by-prop (prop-name prop-value)
-  "Find a command in commands storage by PROP-NAME and PROP-VALUE."
+(defun epx--find-command-by-prop (cmds prop-name prop-value)
+  "Find a command in CMDS by PROP-NAME and PROP-VALUE."
   (cl-find-if (lambda (cmd)
 		(equal (plist-get cmd prop-name) prop-value))
-	      (epx--read-commands-from-file)))
+	      cmds))
 
 
-(defun epx--annotate (candidate)
-  "Show command for CANDIDATE along with it’s name on completion."
+(defun epx--annotate (cmds candidate)
+  "Show command from CMDS for CANDIDATE along with it’s name on completion."
   (when candidate
     (format "%s %s"
 	    (propertize " " 'display '(space :align-to 30))
-	    (propertize (plist-get (epx--find-command-by-prop :name candidate) :command) 'face 'completions-annotations))))
+	    (propertize
+	     (plist-get (epx--find-command-by-prop cmds :name candidate) :command)
+	     'face
+	     'completions-annotations))))
 
 ;; --- End Annotation ---
 
@@ -138,10 +143,26 @@
       (write-region "" nil file))))
 
 
+(defun epx--rename-deprecated-variable ()
+  "Rename LOCAL-PROJECT-CMDS to EPX-COMMANDS in .DIR-LOCALS.EL.  Return t if renamed, else nil."
+  (hack-dir-local-variables)
+  (when-let ((commands (alist-get 'local-project-cmds file-local-variables-alist nil nil #'equal)))
+      (if (y-or-n-p "You are using deprecated variable name in .dir-locals.el.  Current name is ‘epx-commands’.  Rename?")
+	  (progn (with-current-buffer (find-file-noselect (epx--commands-file))
+		   (delete-dir-local-variable nil 'local-project-cmds)
+		   (add-dir-local-variable nil 'epx-commands commands)
+		   (save-buffer)
+		   (kill-buffer))
+		 (setq file-local-variables-alist nil)
+		 t)))
+  t)
+
+
 (defun epx--read-commands-from-locals ()
   "Read project commands from ‘.dir-locals.el’."
-  (hack-dir-local-variables)
-  (alist-get 'local-project-cmds file-local-variables-alist nil nil #'equal))
+  (let ((var-name (intern (if (epx--rename-deprecated-variable) "epx-commands" "local-project-cmds"))))
+    (hack-dir-local-variables)
+    (alist-get var-name file-local-variables-alist nil nil #'equal)))
 
 
 (defun epx--read-commands-from-eld ()
@@ -161,11 +182,12 @@
 
 (defun epx--write-commands-to-locals (commands)
   "Write COMMANDS to ‘.dir-locals.el’."
-  (with-current-buffer (find-file-noselect (epx--commands-file))
-    (delete-dir-local-variable nil 'local-project-cmds)
-    (add-dir-local-variable nil 'local-project-cmds commands)
-    (save-buffer)
-    (kill-buffer)))
+  (let ((var-name (intern (if (epx--rename-deprecated-variable) "epx-commands" "local-project-cmds"))))
+    (with-current-buffer (find-file-noselect (epx--commands-file))
+      (delete-dir-local-variable nil var-name)
+      (add-dir-local-variable nil var-name commands)
+      (save-buffer)
+      (kill-buffer))))
 
 
 (defun epx--write-command-to-eld(commands)
@@ -186,10 +208,10 @@
 (defun epx--read-shell-command ()
   "Prompt for a shell command with completion from commands file."
   (let* ((commands-file (epx--commands-file))
-         (cmds (if (file-exists-p commands-file)
-                   (epx--read-commands-from-file)))
+         (cmds (when (file-exists-p commands-file)
+                 (epx--read-commands-from-file)))
          (history (mapcar (lambda (plist) (plist-get plist :name)) cmds))
-	 (completion-extra-properties (list :annotation-function #'epx--annotate))
+	 (completion-extra-properties (list :annotation-function (apply-partially #'epx--annotate cmds)))
          (name (completing-read "Project command: " history nil t)))
     (cl-find-if (lambda (plist) (string= (plist-get plist :name) name)) cmds)))
 
@@ -237,7 +259,7 @@ When called interactively, prompt for COMMAND with completion from history."
   "Delete COMMAND from commands file."
   (interactive
    (list (epx--read-shell-command)))
-  (if (y-or-n-p (format "Are you sure you want to remove command %s?" (plist-get command :name)))
+  (when (y-or-n-p (format "Are you sure you want to remove command %s?" (plist-get command :name)))
       (let* ((local-project-cmds (epx--read-commands-from-file) )
              (updated (cl-remove command local-project-cmds :test #'equal)))
 	(epx--write-commands-to-file updated))))
@@ -286,8 +308,7 @@ ENV-VARS and COMPILE default to nil."
 
 
 (defun epx--record-command (command)
-  "Add COMMAND to commands file.
-If a command with the same name already exists, throw an error"
+  "Add COMMAND to commands file.  If a command with the same name already exists, throw an error."
   (let ((locals-file (epx--commands-file)))
     (when (file-exists-p locals-file)
       (let* ((existing-cmds (epx--read-commands-from-file))

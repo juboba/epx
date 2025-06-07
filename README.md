@@ -60,9 +60,13 @@ You can also always install the package using `M-x package-install` instead.
     buffer scoped to the project.
 
 - `epx-remove-command`
-:   Remove a saved command from `.dir-locals.el`.
+:   Remove a saved command from commands file.
 
 # Example entries in storage files
+
+- NOTE: ‘local-project-cmds’ was renamed to ‘epx-commands’ in 0.3.1. Deprecation mechanism is provided.
+
+
 ## .dir-locals.el
 
 ```
